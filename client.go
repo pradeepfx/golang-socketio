@@ -64,3 +64,12 @@ Close client connection
 func (c *Client) Close() {
 	closeChannel(&c.Channel, &c.methods)
 }
+
+func (c *Client) ConnectNamespace(namespace string) error {
+	msg := &protocol.Message{
+		Type:      protocol.MessageTypeEmpty,
+		Namespace: namespace,
+	}
+
+	return send(msg, &c.Channel, nil)
+}
