@@ -1,6 +1,7 @@
 package gosocketio
 
 import (
+	"github.com/graarh/golang-socketio/protocol"
 	"github.com/graarh/golang-socketio/transport"
 	"strconv"
 )
@@ -63,4 +64,17 @@ Close client connection
 */
 func (c *Client) Close() {
 	closeChannel(&c.Channel, &c.methods)
+}
+
+/**
+Open client connection to namespace specified
+Connection to one specific namespace is required before emit message in it
+*/
+func (c *Client) ConnectNamespace(namespace string) error {
+	msg := &protocol.Message{
+		Type:      protocol.MessageTypeEmpty,
+		Namespace: namespace,
+	}
+
+	return send(msg, &c.Channel, nil)
 }

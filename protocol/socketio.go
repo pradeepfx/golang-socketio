@@ -50,6 +50,8 @@ func Encode(msg *Message) (string, error) {
 		return "", err
 	}
 
+	result = result + msg.Namespace
+
 	if msg.Type == MessageTypeEmpty || msg.Type == MessageTypePing ||
 		msg.Type == MessageTypePong {
 		return result, nil
@@ -64,7 +66,7 @@ func Encode(msg *Message) (string, error) {
 	}
 
 	if msg.Type == MessageTypeAckResponse {
-		return result + "[" + msg.Args + "]", nil
+		return result + ",[" + msg.Args + "]", nil
 	}
 
 	jsonMethod, err := json.Marshal(&msg.Method)
@@ -72,7 +74,7 @@ func Encode(msg *Message) (string, error) {
 		return "", err
 	}
 
-	return result + "[" + string(jsonMethod) + "," + msg.Args + "]", nil
+	return result + ",[" + string(jsonMethod) + "," + msg.Args + "]", nil
 }
 
 func MustEncode(msg *Message) string {
