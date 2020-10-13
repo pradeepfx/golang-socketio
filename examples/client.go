@@ -1,18 +1,19 @@
 package main
 
 import (
-	"github.com/graarh/golang-socketio"
-	"github.com/graarh/golang-socketio/transport"
 	"log"
 	"runtime"
 	"time"
+
+	"github.com/paxosglobal/golang-socketio"
+	"github.com/paxosglobal/golang-socketio/transport"
 )
 
-type Channel struct {
+type ChannelClient struct {
 	Channel string `json:"channel"`
 }
 
-type Message struct {
+type MessageClient struct {
 	Id      int    `json:"id"`
 	Channel string `json:"channel"`
 	Text    string `json:"text"`
@@ -20,9 +21,9 @@ type Message struct {
 
 func sendJoin(c *gosocketio.Client) {
 	log.Println("Acking /join")
-	result, err := c.Ack("/join", Channel{"main"}, time.Second*5)
+	result, err := c.Ack("/join", ChannelClient{"main"}, time.Second*5)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error acking join:", err)
 	} else {
 		log.Println("Ack result to /join: ", result)
 	}
@@ -38,15 +39,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = c.On("/message", func(h *gosocketio.Channel, args Message) {
+	err = c.On("/message", func(h *gosocketio.Channel, args MessageClient) {
 		log.Println("--- Got chat message: ", args)
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = c.On(gosocketio.OnDisconnection, func(h *gosocketio.Channel) {
-		log.Fatal("Disconnected")
+	err = c.On(gosocketio.OnDisconnection, func(h *gosocketio.Channel, errors interface{}) {
+		log.Fatal("Disconnected... ", errors)
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -67,7 +68,7 @@ func main() {
 	go sendJoin(c)
 	go sendJoin(c)
 
-	time.Sleep(60 * time.Second)
+	time.Sleep(10 * time.Second)
 	c.Close()
 
 	log.Println(" [x] Complete")

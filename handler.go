@@ -2,9 +2,10 @@ package gosocketio
 
 import (
 	"encoding/json"
-	"github.com/graarh/golang-socketio/protocol"
-	"sync"
 	"reflect"
+	"sync"
+
+	"github.com/paxosglobal/golang-socketio/protocol"
 )
 
 const (
@@ -27,6 +28,10 @@ type methods struct {
 
 	onConnection    systemHandler
 	onDisconnection systemHandler
+}
+
+type ConnectionErrors struct {
+	Errors []error
 }
 
 /**
@@ -63,7 +68,7 @@ func (m *methods) findMethod(method string) (*caller, bool) {
 	return f, ok
 }
 
-func (m *methods) callLoopEvent(c *Channel, event string) {
+func (m *methods) callLoopEvent(c *Channel, event string, errors ...error) {
 	if m.onConnection != nil && event == OnConnection {
 		m.onConnection(c)
 	}
@@ -75,8 +80,12 @@ func (m *methods) callLoopEvent(c *Channel, event string) {
 	if !ok {
 		return
 	}
+	if len(errors) == 0 || !f.ArgsPresent {
+		f.callFunc(c, &struct{}{})
+		return
+	}
 
-	f.callFunc(c, &struct{}{})
+	f.callFunc(c, &ConnectionErrors{errors})
 }
 
 /**
