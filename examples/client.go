@@ -9,11 +9,11 @@ import (
 	"github.com/paxosglobal/golang-socketio/transport"
 )
 
-type ChannelClient struct {
+type ClientChannel struct {
 	Channel string `json:"channel"`
 }
 
-type MessageClient struct {
+type ClientMessage struct {
 	Id      int    `json:"id"`
 	Channel string `json:"channel"`
 	Text    string `json:"text"`
@@ -21,7 +21,7 @@ type MessageClient struct {
 
 func sendJoin(c *gosocketio.Client) {
 	log.Println("Acking /join")
-	result, err := c.Ack("/join", ChannelClient{"main"}, time.Second*5)
+	result, err := c.Ack("/join", ClientChannel{"main"}, time.Second*5)
 	if err != nil {
 		log.Fatal("error acking join:", err)
 	} else {
@@ -39,7 +39,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = c.On("/message", func(h *gosocketio.Channel, args MessageClient) {
+	err = c.On("/message", func(h *gosocketio.Channel, args ClientMessage) {
 		log.Println("--- Got chat message: ", args)
 	})
 	if err != nil {
