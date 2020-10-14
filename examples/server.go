@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/paxosglobal/golang-socketio"
-	"github.com/paxosglobal/golang-socketio/transport"
+	"github.com/graarh/golang-socketio"
+	"github.com/graarh/golang-socketio/transport"
 )
 
 type Channel struct {

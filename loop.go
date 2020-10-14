@@ -3,12 +3,13 @@ package gosocketio
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/paxosglobal/golang-socketio/protocol"
-	"github.com/paxosglobal/golang-socketio/transport"
+	"github.com/graarh/golang-socketio/protocol"
+	"github.com/graarh/golang-socketio/transport"
 )
 
 const (
@@ -120,7 +121,8 @@ func inLoop(c *Channel, m *methods) error {
 		}
 		msg, err := protocol.Decode(pkg)
 		if err != nil {
-			closeChannel(c, m, protocol.ErrorWrongPacket, err)
+			detailedError := fmt.Errorf("error decoding message: %s", pkg)
+			closeChannel(c, m, protocol.ErrorWrongPacket, err, detailedError)
 			return err
 		}
 
