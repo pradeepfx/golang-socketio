@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/graarh/golang-socketio"
-	"github.com/graarh/golang-socketio/transport"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/paxosglobal/golang-socketio"
+	"github.com/paxosglobal/golang-socketio/transport"
 )
 
 type Channel struct {
@@ -24,7 +25,7 @@ func main() {
 	server.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
 		log.Println("Connected")
 
-		c.Emit("/message", Message{10, "main", "using emit"})
+		c.Emit("/message", "/test", Message{10, "main", "using emit"})
 
 		c.Join("test")
 		c.BroadcastTo("test", "/message", Message{10, "main", "using broadcast"})

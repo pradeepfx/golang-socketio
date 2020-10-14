@@ -3,11 +3,12 @@ package gosocketio
 import (
 	"encoding/json"
 	"errors"
-	"github.com/graarh/golang-socketio/protocol"
-	"github.com/graarh/golang-socketio/transport"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/paxosglobal/golang-socketio/protocol"
+	"github.com/paxosglobal/golang-socketio/transport"
 )
 
 const (
@@ -83,7 +84,7 @@ func (c *Channel) IsAlive() bool {
 /**
 Close channel
 */
-func closeChannel(c *Channel, m *methods, args ...interface{}) error {
+func closeChannel(c *Channel, m *methods, reasons ...error) error {
 	c.aliveLock.Lock()
 	defer c.aliveLock.Unlock()
 
@@ -101,7 +102,7 @@ func closeChannel(c *Channel, m *methods, args ...interface{}) error {
 	}
 	c.out <- protocol.CloseMessage
 
-	m.callLoopEvent(c, OnDisconnection)
+	m.callLoopEvent(c, OnDisconnection, reasons...)
 
 	overfloodedLock.Lock()
 	delete(overflooded, c)
@@ -119,14 +120,14 @@ func inLoop(c *Channel, m *methods) error {
 		}
 		msg, err := protocol.Decode(pkg)
 		if err != nil {
-			closeChannel(c, m, protocol.ErrorWrongPacket)
+			closeChannel(c, m, protocol.ErrorWrongPacket, err)
 			return err
 		}
 
 		switch msg.Type {
 		case protocol.MessageTypeOpen:
 			if err := json.Unmarshal([]byte(msg.Source[1:]), &c.header); err != nil {
-				closeChannel(c, m, ErrorWrongHeader)
+				closeChannel(c, m, ErrorWrongHeader, err)
 			}
 			m.callLoopEvent(c, OnConnection)
 		case protocol.MessageTypePing:

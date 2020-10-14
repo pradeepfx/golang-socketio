@@ -125,16 +125,19 @@ func getAck(text string) (ackId int, restText string, err error) {
 	text = text[2:]
 
 	pos := strings.IndexByte(text, '[')
+	payloadIdx := pos
 	if pos == -1 {
 		return 0, "", ErrorWrongPacket
 	}
-
+	if p := strings.IndexByte(text[0:pos], ','); p >=0 {
+		pos = p
+	}
 	ack, err := strconv.Atoi(text[0:pos])
 	if err != nil {
 		return 0, "", err
 	}
 
-	return ack, text[pos:], nil
+	return ack, text[payloadIdx:], nil
 }
 
 /**
