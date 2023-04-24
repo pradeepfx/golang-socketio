@@ -144,7 +144,7 @@ func getAck(text string) (ackId int, restText string, err error) {
 Get message method of current packet, if present
 */
 func getMethod(text string) (method, restText string, err error) {
-	var start, end, rest, countQuote int
+	var start, end, restStart, restEnd, countQuote int
 
 	for i, c := range text {
 		if c == '"' {
@@ -153,7 +153,7 @@ func getMethod(text string) (method, restText string, err error) {
 				start = i + 1
 			case 1:
 				end = i
-				rest = i + 1
+				restStart = i + 1
 			default:
 				return "", "", ErrorWrongPacket
 			}
@@ -163,16 +163,20 @@ func getMethod(text string) (method, restText string, err error) {
 			if countQuote < 2 {
 				continue
 			}
-			rest = i + 1
+			restStart = i + 1
 			break
 		}
 	}
 
-	if (end < start) || (rest >= len(text)) {
+	// skip delimiters at the end
+	for restEnd = len(text) - 1; restEnd >= restStart && (text[restEnd] == '\n' || text[restEnd] == ' '); restEnd-- {
+	}
+
+	if (end < start) || (restStart >= len(text)) {
 		return "", "", ErrorWrongPacket
 	}
 
-	return text[start:end], text[rest : len(text)-1], nil
+	return text[start:end], text[restStart:restEnd], nil
 }
 
 func Decode(data string) (*Message, error) {
